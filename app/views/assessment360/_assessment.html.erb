@@ -48,6 +48,8 @@
             <th><b>Instructor Grade</b></th>
         <% end %>
         <th class="sorter-true"><b>Total Instructor Grade</b></th>
+        <td><%= @meta_review[cp.id][:avg_grade_for_assgt] %></td>
+        <td><%= @teammate_review[cp.id][:avg_grade_for_assgt] %></td>
         </tr>
     </thead>
     <% @course_participants.each do |cp|%>
@@ -65,8 +67,6 @@
               <td><%= format_score(@assignment_grades[cp.id][assignment.id]) %> </td>
           <% end %>
           <td><%= @final_grades[cp.id] %></td>
-          <td><%= @meta_review[cp.id][:avg_grade_for_assgt] %></td>
-          <td><%= @teammate_review[cp.id][:avg_grade_for_assgt] %></td>
       </tr>
     <% end %>
 </table>
