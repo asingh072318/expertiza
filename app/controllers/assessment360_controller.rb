@@ -47,6 +47,8 @@ class Assessment360Controller < ApplicationController
         assignment_participant = assignment.participants.find_by(user_id: user_id)
         next if assignment.participants.find_by(user_id: user_id).nil? # break out of the loop if there are no participants in the assignment
         next if TeamsUser.team_id(assignment_id, user_id).nil? # break out of the loop if the participant has no team
+        teammate_reviews = assignment_participant.teammate_reviews
+        meta_reviews = assignment_participant.metareviews
         assignment_grade_summary(cp, assignment_id)
         peer_review_score = find_peer_review_score(user_id, assignment_id)
         next if peer_review_score.nil? #Skip if there are no peers
@@ -54,8 +56,6 @@ class Assessment360Controller < ApplicationController
         next if peer_review_score[:review][:scores].nil? #Skip if there are no reviews scores assigned by peer
         next if peer_review_score[:review][:scores][:avg].nil? #Skip if there are is no peer review average score
         @peer_review_scores[cp.id][assignment_id] = peer_review_score[:review][:scores][:avg].round(2)
-        teammate_reviews = assignment_participant.teammate_reviews
-        meta_reviews = assignment_participant.metareviews
         calc_overall_review_info(assignment,
                                  cp,
                                  teammate_reviews,
