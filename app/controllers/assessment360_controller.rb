@@ -98,43 +98,6 @@ class Assessment360Controller < ApplicationController
     end
   end
 
-  # Find the list of all students and assignments pertaining to the course.
-  # This data is used to compute the instructor assigned grade and peer review scores.
-  # There are many nuances about how to collect these scores. See our design document for more deails
-  # http://wiki.expertiza.ncsu.edu/index.php/CSC/ECE_517_Fall_2018_E1871_Grade_Summary_By_Student
-  def course_student_grade_summary
-    @topics = {}
-    @assignment_grades = {}
-    @peer_review_scores = {}
-    @final_grades = {}
-    course = Course.find(params[:course_id])
-    @assignments = course.assignments.reject(&:is_calibrated).reject {|a| a.participants.empty? }
-    @course_participants = course.get_participants
-    insure_existence_of(@course_participants,course)
-    @course_participants.each do |cp|
-      @topics[cp.id] = {}
-      @assignment_grades[cp.id] = {}
-      @peer_review_scores[cp.id] = {}
-      @final_grades[cp.id] = 0
-      @assignments.each do |assignment|
-        user_id = cp.user_id
-        assignment_id = assignment.id
-        assignment_participant = assignment.participants.find_by(user_id: user_id)
-        next if assignment.participants.find_by(user_id: user_id).nil? # break out of the loop if there are no participants in the assignment
-        next if TeamsUser.team_id(assignment_id, user_id).nil? # break out of the loop if the participant has no team
-        
-        assignment_grade_summary(cp, assignment_id) # pull information about the student's grades for particular assignment
-        peer_review_score = find_peer_review_score(user_id, assignment_id)
-        
-        next if peer_review_score.nil? #Skip if there are no peers
-        next if peer_review_score[:review].nil? #Skip if there are no reviews done by peer
-        next if peer_review_score[:review][:scores].nil? #Skip if there are no reviews scores assigned by peer
-        next if peer_review_score[:review][:scores][:avg].nil? #Skip if there are is no peer review average score
-        @peer_review_scores[cp.id][assignment_id] = peer_review_score[:review][:scores][:avg].round(2)
-      end
-    end
-  end
-
   def assignment_grade_summary(cp, assignment_id)
     user_id = cp.user_id
     # topic exists if a team signed up for a topic, which can be found via the user and the assignment
